@@ -48,6 +48,37 @@ const travelTips = [
 
 export default function DashboardScreen() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [hasError, setHasError] = useState(false);
+
+  // Add error boundary for this component
+  useEffect(() => {
+    const handleError = (error: ErrorEvent) => {
+      console.error('Dashboard error:', error);
+      setHasError(true);
+    };
+
+    // Add error listener
+    window.addEventListener('error', handleError);
+    
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+
+  if (hasError) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <CustomText variant="h3" style={styles.errorText}>
+            Unable to load dashboard
+          </CustomText>
+          <CustomText variant="body" style={styles.errorSubtext}>
+            Please restart the app
+          </CustomText>
+        </View>
+      </SafeAreaView>
+    );
+  }
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(50));
   const [scaleAnim] = useState(new Animated.Value(0.8));
@@ -337,4 +368,19 @@ const styles = StyleSheet.create({
   bottomSpacing: {
     height: DesignTokens.spacing.xl,
   } as ViewStyle,
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: DesignTokens.spacing.lg,
+  } as ViewStyle,
+  errorText: {
+    color: Colors.semantic.error,
+    textAlign: 'center',
+    marginBottom: DesignTokens.spacing.md,
+  } as TextStyle,
+  errorSubtext: {
+    color: Colors.neutrals.gray600,
+    textAlign: 'center',
+  } as TextStyle,
 });

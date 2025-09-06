@@ -59,10 +59,8 @@ export default function SignupScreen() {
       } else {
         // Don't show alert, let the index.tsx handle navigation
         console.log('Signup successful, user should be redirected automatically');
-        // Force navigation back to index to trigger the redirect logic
-        setTimeout(() => {
-          router.replace('/');
-        }, 100);
+        // Navigate directly to dashboard instead of index to avoid race conditions
+        router.replace('/(tabs)/dashboard');
       }
     } else {
       console.error('Signup error:', result.error);

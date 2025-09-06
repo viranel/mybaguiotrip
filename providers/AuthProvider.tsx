@@ -62,13 +62,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (result.success && result.user) {
         console.log('Setting user state after signin:', result.user);
         setUser(result.user);
-        setLoading(false); // Ensure loading is set to false
       }
       
       return result;
     } catch (error) {
       console.error('SignIn error in AuthProvider:', error);
-      setLoading(false); // Ensure loading is set to false on error
       return { success: false, error };
     } finally {
       setLoading(false);
@@ -83,13 +81,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (result.success && result.user) {
         console.log('Setting user state after signup:', result.user);
         setUser(result.user);
-        setLoading(false); // Ensure loading is set to false
       }
       
       return result;
     } catch (error) {
       console.error('SignUp error in AuthProvider:', error);
-      setLoading(false); // Ensure loading is set to false on error
       return { success: false, error };
     } finally {
       setLoading(false);
