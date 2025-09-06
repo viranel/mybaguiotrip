@@ -37,8 +37,8 @@ export default function LoginScreen() {
     if (result.success) {
       // Don't show alert, let the index.tsx handle navigation
       console.log('Login successful, user should be redirected automatically');
-      // Navigate directly to dashboard instead of index to avoid race conditions
-      router.replace('/(tabs)/dashboard');
+      // Navigate back to index to let the auth state change handle the redirect
+      router.replace('/');
     } else {
       console.error('Login error:', result.error);
       Alert.alert('Error', result.error || 'Login failed');

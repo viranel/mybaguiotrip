@@ -52,6 +52,7 @@ export default function Index() {
 
   if (user) {
     console.log('Redirecting to dashboard for user:', user.email);
+    // Add a small delay to ensure auth state is stable
     return <Redirect key={userKey} href="/(tabs)/dashboard" />;
   } else {
     console.log('Redirecting to login - no user');
