@@ -221,19 +221,30 @@ export const auth = {
 
   async getCurrentUser() {
     try {
+      console.log('lib/auth: Getting current user...');
       const { data: { user }, error } = await supabase.auth.getUser();
       
-      if (error) throw error;
+      console.log('lib/auth: Supabase response:', { user: user?.email || 'No user', error });
+      
+      if (error) {
+        console.error('lib/auth: Error getting user:', error);
+        throw error;
+      }
+
+      const processedUser = user ? {
+        id: user.id,
+        email: user.email!,
+        fullName: user.user_metadata?.full_name,
+      } : null;
+
+      console.log('lib/auth: Processed user:', processedUser);
 
       return {
         success: true,
-        user: user ? {
-          id: user.id,
-          email: user.email!,
-          fullName: user.user_metadata?.full_name,
-        } : null,
+        user: processedUser,
       };
     } catch (error: any) {
+      console.error('lib/auth: Error in getCurrentUser:', error);
       return {
         success: false,
         user: null,

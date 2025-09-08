@@ -1,82 +1,61 @@
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View, Platform } from 'react-native';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import CustomText from '../components/ui/CustomText';
 import { Colors } from '../constants/Colors';
 import { useAuth } from '../providers/AuthProvider';
 
 export default function Index() {
   console.log('Index.tsx - Component mounted/rendered');
-  const [isLoading, setIsLoading] = useState(true);
-  const [forceNavigation, setForceNavigation] = useState(false);
   const { user, loading: authLoading } = useAuth();
 
+  // Simplified navigation logic
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1000);
+    console.log('Index.tsx - Auth state changed:', { 
+      user: user?.email || 'No user', 
+      authLoading,
+      platform: Platform.OS 
+    });
+
+    // Don't navigate while auth is still loading
+    if (authLoading) {
+      console.log('Index.tsx - Auth still loading, waiting...');
+      return;
+    }
+
+    // Add a small delay to ensure everything is ready
+    const timer = setTimeout(() => {
+      try {
+        if (user) {
+          console.log('Index.tsx - User found, navigating to tabs:', user.email);
+          router.replace('/(tabs)');
+        } else {
+          console.log('Index.tsx - No user, navigating to login');
+          router.replace('/auth/login');
+        }
+      } catch (error) {
+        console.error('Index.tsx - Navigation error:', error);
+        // Fallback to login
+        router.replace('/auth/login');
+      }
+    }, 500); // Small delay to ensure smooth transition
+
     return () => clearTimeout(timer);
-  }, []);
+  }, [user, authLoading]);
 
-  // Add a timeout to force navigation if auth takes too long
+  // Fallback timeout in case auth gets stuck
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      console.log('Index.tsx - Auth timeout, forcing navigation');
-      setForceNavigation(true);
-    }, Platform.OS === 'web' ? 3000 : 5000); // Shorter timeout for web
-
-    return () => clearTimeout(timeout);
-  }, []);
-
-  useEffect(() => {
-    try {
-      console.log('Index.tsx - User state:', user);
-      console.log('Index.tsx - Auth loading:', authLoading);
-      console.log('Index.tsx - App loading:', isLoading);
-      console.log('Index.tsx - Component re-rendered');
-    } catch (error) {
-      console.error('Index.tsx - Error in useEffect:', error);
-    }
-  }, [user, authLoading, isLoading]);
-
-  // Add a separate effect to track when user changes
-  useEffect(() => {
-    try {
-      if (user) {
-        console.log('Index.tsx - User detected, should redirect to dashboard');
-      } else {
-        console.log('Index.tsx - No user, should redirect to login');
-      }
-    } catch (error) {
-      console.error('Index.tsx - Error in user change effect:', error);
-    }
-  }, [user]);
-
-  // Force re-render when user changes
-  const userKey = user ? `user-${user.id}` : 'no-user';
-
-  // Navigate once loading is complete or force navigation is triggered
-  useEffect(() => {
-    if ((isLoading || authLoading) && !forceNavigation) return;
-    try {
-      // For web, always go to login to avoid auth issues
-      if (Platform.OS === 'web') {
-        console.log('Web platform detected - routing to login');
+    const fallbackTimer = setTimeout(() => {
+      console.log('Index.tsx - Fallback timeout reached, forcing navigation to login');
+      try {
         router.replace('/auth/login');
-        return;
+      } catch (error) {
+        console.error('Index.tsx - Fallback navigation error:', error);
       }
-      
-      if (user) {
-        console.log('Routing to dashboard for user:', user.email);
-        router.replace('/(tabs)');
-      } else {
-        console.log('Routing to login - no user');
-        router.replace('/auth/login');
-      }
-    } catch (e) {
-      console.error('Index.tsx - navigation error', e);
-      // Fallback navigation if there's an error
-      router.replace('/auth/login');
-    }
-  }, [isLoading, authLoading, user, userKey, forceNavigation]);
+    }, 10000); // 10 second fallback
+
+    return () => clearTimeout(fallbackTimer);
+  }, []);
 
   // Always render a lightweight loading state; navigation will replace this screen
   return (

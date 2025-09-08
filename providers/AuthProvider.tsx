@@ -28,22 +28,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('AuthProvider: Initializing...');
+    
     // Get initial session with timeout
     const getInitialSession = async () => {
       try {
+        console.log('AuthProvider: Getting initial session...');
+        
         // Add a timeout to prevent hanging
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Auth timeout')), 3000)
+          setTimeout(() => {
+            console.log('AuthProvider: Auth timeout reached');
+            reject(new Error('Auth timeout'));
+          }, 2000)
         );
         
         const authPromise = auth.getCurrentUser();
-        const { user: currentUser } = await Promise.race([authPromise, timeoutPromise]);
-        setUser(currentUser);
+        console.log('AuthProvider: Racing auth promise with timeout...');
+        const result = await Promise.race([authPromise, timeoutPromise]);
+        console.log('AuthProvider: Auth result:', result);
+        
+        if (result && result.user) {
+          console.log('AuthProvider: Setting user from initial session:', result.user.email);
+          setUser(result.user);
+        } else {
+          console.log('AuthProvider: No user in initial session');
+          setUser(null);
+        }
       } catch (error) {
-        console.error('Error getting initial session:', error);
+        console.error('AuthProvider: Error getting initial session:', error);
         // Continue without user if auth fails
         setUser(null);
       } finally {
+        console.log('AuthProvider: Setting loading to false');
         setLoading(false);
       }
     };
@@ -51,9 +68,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     getInitialSession();
 
     // Listen for auth state changes
+    console.log('AuthProvider: Setting up auth state listener...');
     const { data: { subscription } } = auth.onAuthStateChange((user) => {
       try {
         console.log('AuthProvider: Auth state changed:', user?.email || 'No user');
+        console.log('AuthProvider: Setting user state to:', user ? 'user exists' : 'null');
         setUser(user);
         setLoading(false);
       } catch (error) {
