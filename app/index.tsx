@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, Platform } from 'react-native';
 import CustomText from '../components/ui/CustomText';
 import { Colors } from '../constants/Colors';
 import { useAuth } from '../providers/AuthProvider';
@@ -21,7 +21,7 @@ export default function Index() {
     const timeout = setTimeout(() => {
       console.log('Index.tsx - Auth timeout, forcing navigation');
       setForceNavigation(true);
-    }, 5000); // 5 second timeout
+    }, Platform.OS === 'web' ? 3000 : 5000); // Shorter timeout for web
 
     return () => clearTimeout(timeout);
   }, []);
@@ -57,6 +57,13 @@ export default function Index() {
   useEffect(() => {
     if ((isLoading || authLoading) && !forceNavigation) return;
     try {
+      // For web, always go to login to avoid auth issues
+      if (Platform.OS === 'web') {
+        console.log('Web platform detected - routing to login');
+        router.replace('/auth/login');
+        return;
+      }
+      
       if (user) {
         console.log('Routing to dashboard for user:', user.email);
         router.replace('/(tabs)');
@@ -75,7 +82,12 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.appIdentity.primaryBrand} />
+        <ActivityIndicator 
+          size="large" 
+          color={Colors.appIdentity.primaryBrand}
+          accessibilityLabel="Loading application"
+          accessibilityRole="progressbar"
+        />
         <CustomText variant="h3" style={styles.loadingText}>
           My Baguio Trip
         </CustomText>
@@ -102,10 +114,14 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: Colors.appIdentity.primaryBrand,
     textAlign: 'center',
+    // Use modern CSS properties for better compatibility
+    fontSize: 24,
+    fontWeight: '600',
   },
   loadingSubtext: {
     marginTop: 8,
     color: Colors.neutrals.gray600,
     textAlign: 'center',
+    fontSize: 16,
   },
 });

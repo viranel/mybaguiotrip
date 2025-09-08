@@ -35,6 +35,11 @@ jobs:
     - name: Build for web
       run: npx expo export --platform web
       
+    - name: Copy web assets
+      run: |
+        cp public/index.html dist/
+        cp public/_headers dist/
+      
     - name: Setup Pages
       uses: actions/configure-pages@v4
       
