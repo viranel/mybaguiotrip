@@ -8,11 +8,22 @@ import { useAuth } from '../providers/AuthProvider';
 export default function Index() {
   console.log('Index.tsx - Component mounted/rendered');
   const [isLoading, setIsLoading] = useState(true);
+  const [forceNavigation, setForceNavigation] = useState(false);
   const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Add a timeout to force navigation if auth takes too long
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      console.log('Index.tsx - Auth timeout, forcing navigation');
+      setForceNavigation(true);
+    }, 5000); // 5 second timeout
+
+    return () => clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
@@ -42,9 +53,9 @@ export default function Index() {
   // Force re-render when user changes
   const userKey = user ? `user-${user.id}` : 'no-user';
 
-  // Navigate once loading is complete
+  // Navigate once loading is complete or force navigation is triggered
   useEffect(() => {
-    if (isLoading || authLoading) return;
+    if ((isLoading || authLoading) && !forceNavigation) return;
     try {
       if (user) {
         console.log('Routing to dashboard for user:', user.email);
@@ -55,8 +66,10 @@ export default function Index() {
       }
     } catch (e) {
       console.error('Index.tsx - navigation error', e);
+      // Fallback navigation if there's an error
+      router.replace('/auth/login');
     }
-  }, [isLoading, authLoading, user, userKey]);
+  }, [isLoading, authLoading, user, userKey, forceNavigation]);
 
   // Always render a lightweight loading state; navigation will replace this screen
   return (

@@ -28,13 +28,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
+    // Get initial session with timeout
     const getInitialSession = async () => {
       try {
-        const { user: currentUser } = await auth.getCurrentUser();
+        // Add a timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Auth timeout')), 3000)
+        );
+        
+        const authPromise = auth.getCurrentUser();
+        const { user: currentUser } = await Promise.race([authPromise, timeoutPromise]);
         setUser(currentUser);
       } catch (error) {
         console.error('Error getting initial session:', error);
+        // Continue without user if auth fails
+        setUser(null);
       } finally {
         setLoading(false);
       }
