@@ -105,6 +105,8 @@ const supportItems: SettingsItem[] = [
   },
 ];
 
+// Development items removed for production
+
 export default function SettingsScreen() {
   const { user, signOut, loading } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
@@ -171,6 +173,7 @@ export default function SettingsScreen() {
         console.log('Pressed:', item.title);
     }
   };
+
 
   const handleToggle = (itemId: string, value: boolean) => {
     if (itemId === 'dark-mode') {
@@ -349,6 +352,7 @@ export default function SettingsScreen() {
             </Animated.View>
           ))}
         </View>
+
 
 
         {/* Logout Button */}

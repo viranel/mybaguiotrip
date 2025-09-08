@@ -144,5 +144,27 @@ CREATE TRIGGER update_trip_itineraries_updated_at
   BEFORE UPDATE ON public.trip_itineraries
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
+-- Create user_credentials table (DEVELOPMENT ONLY - Remove in production)
+CREATE TABLE IF NOT EXISTS public.user_credentials (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email TEXT NOT NULL,
+  credentials_text TEXT NOT NULL,
+  is_development BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS on user_credentials
+ALTER TABLE public.user_credentials ENABLE ROW LEVEL SECURITY;
+
+-- Create policy for user_credentials (DEVELOPMENT ONLY)
+CREATE POLICY "Users can view own credentials" ON public.user_credentials
+  FOR SELECT USING (email = auth.jwt() ->> 'email');
+
+CREATE POLICY "Users can insert own credentials" ON public.user_credentials
+  FOR INSERT WITH CHECK (email = auth.jwt() ->> 'email');
+
+-- Note: This table is for development purposes only
+-- Remove this table and all related code before production deployment
+
 
 
