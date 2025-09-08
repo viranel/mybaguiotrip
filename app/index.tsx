@@ -1,4 +1,4 @@
-import { Redirect } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import CustomText from '../components/ui/CustomText';
@@ -16,48 +16,62 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    console.log('Index.tsx - User state:', user);
-    console.log('Index.tsx - Auth loading:', authLoading);
-    console.log('Index.tsx - App loading:', isLoading);
-    console.log('Index.tsx - Component re-rendered');
+    try {
+      console.log('Index.tsx - User state:', user);
+      console.log('Index.tsx - Auth loading:', authLoading);
+      console.log('Index.tsx - App loading:', isLoading);
+      console.log('Index.tsx - Component re-rendered');
+    } catch (error) {
+      console.error('Index.tsx - Error in useEffect:', error);
+    }
   }, [user, authLoading, isLoading]);
 
   // Add a separate effect to track when user changes
   useEffect(() => {
-    if (user) {
-      console.log('Index.tsx - User detected, should redirect to dashboard');
-    } else {
-      console.log('Index.tsx - No user, should redirect to login');
+    try {
+      if (user) {
+        console.log('Index.tsx - User detected, should redirect to dashboard');
+      } else {
+        console.log('Index.tsx - No user, should redirect to login');
+      }
+    } catch (error) {
+      console.error('Index.tsx - Error in user change effect:', error);
     }
   }, [user]);
 
   // Force re-render when user changes
   const userKey = user ? `user-${user.id}` : 'no-user';
 
-  if (isLoading || authLoading) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.appIdentity.primaryBrand} />
-          <CustomText variant="h3" style={styles.loadingText}>
-            My Baguio Trip
-          </CustomText>
-          <CustomText variant="body" style={styles.loadingSubtext}>
-            Loading your adventure...
-          </CustomText>
-        </View>
-      </View>
-    );
-  }
+  // Navigate once loading is complete
+  useEffect(() => {
+    if (isLoading || authLoading) return;
+    try {
+      if (user) {
+        console.log('Routing to dashboard for user:', user.email);
+        router.replace('/(tabs)');
+      } else {
+        console.log('Routing to login - no user');
+        router.replace('/auth/login');
+      }
+    } catch (e) {
+      console.error('Index.tsx - navigation error', e);
+    }
+  }, [isLoading, authLoading, user, userKey]);
 
-  if (user) {
-    console.log('Redirecting to dashboard for user:', user.email);
-    // Add a small delay to ensure auth state is stable
-    return <Redirect key={userKey} href="/(tabs)/dashboard" />;
-  } else {
-    console.log('Redirecting to login - no user');
-    return <Redirect key={userKey} href="/auth/login" />;
-  }
+  // Always render a lightweight loading state; navigation will replace this screen
+  return (
+    <View style={styles.container}>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.appIdentity.primaryBrand} />
+        <CustomText variant="h3" style={styles.loadingText}>
+          My Baguio Trip
+        </CustomText>
+        <CustomText variant="body" style={styles.loadingSubtext}>
+          Loading your adventure...
+        </CustomText>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

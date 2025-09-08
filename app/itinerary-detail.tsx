@@ -81,7 +81,7 @@ export default function ItineraryDetailScreen() {
 
       console.log('🔍 Loading itinerary for user:', user.email, 'ID:', itineraryId);
       
-      const loadedItinerary = tripsService.getTripById(itineraryId, user.email);
+      const loadedItinerary = await tripsService.getTripById(itineraryId, user.email);
       
       if (!loadedItinerary) {
         setError('Itinerary not found for this user');

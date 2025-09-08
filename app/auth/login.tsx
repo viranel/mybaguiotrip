@@ -35,10 +35,9 @@ export default function LoginScreen() {
     console.log('Login result:', result);
     
     if (result.success) {
-      // Don't show alert, let the index.tsx handle navigation
-      console.log('Login successful, user should be redirected automatically');
-      // Navigate back to index to let the auth state change handle the redirect
-      router.replace('/');
+      // Navigate directly to tabs to avoid intermediate redirects on Android
+      console.log('Login successful, navigating to home tabs');
+        router.replace('/(tabs)');
     } else {
       console.error('Login error:', result.error);
       Alert.alert('Error', result.error || 'Login failed');

@@ -199,13 +199,23 @@ Focus on authentic Baguio experiences, local cuisine, and must-see attractions. 
 
   private parseAIResponse(aiResponse: string, request: ItineraryRequest): GeneratedItinerary {
     try {
+      console.log('Raw AI response:', aiResponse);
+      
       // Try to extract JSON from the response
       const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
-        throw new Error('No JSON found in AI response');
+        console.warn('No JSON found in AI response, using fallback');
+        return this.createFallbackItinerary(request);
       }
 
       const parsedData = JSON.parse(jsonMatch[0]);
+      console.log('Parsed AI data:', parsedData);
+      
+      // Validate required fields
+      if (!parsedData.days || !Array.isArray(parsedData.days) || parsedData.days.length === 0) {
+        console.warn('Invalid days data in AI response, using fallback');
+        return this.createFallbackItinerary(request);
+      }
       
       // Generate a unique ID
       const id = `itinerary_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -233,6 +243,7 @@ Focus on authentic Baguio experiences, local cuisine, and must-see attractions. 
 
     } catch (error) {
       console.error('Error parsing AI response:', error);
+      console.log('Using fallback itinerary due to parsing error');
       
       // Fallback: create a basic itinerary structure
       return this.createFallbackItinerary(request);

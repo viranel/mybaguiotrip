@@ -9,7 +9,7 @@ import CustomText from '../ui/CustomText';
 interface FeaturedPlace {
   name: string;
   description: string;
-  image: string;
+  image: any;
   category: string;
   rating: number;
   distance?: string;
@@ -109,7 +109,7 @@ export default function FeaturedDestinations() {
           >
             <View style={styles.imageContainer}>
               <Image 
-                source={{ uri: place.image }} 
+                source={place.image as any}
                 style={styles.image}
               />
               <View style={styles.overlay}>

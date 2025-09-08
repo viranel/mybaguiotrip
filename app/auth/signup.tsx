@@ -48,7 +48,7 @@ export default function SignupScreen() {
     console.log('Signup result:', result);
     
     if (result.success) {
-      if (result.needsConfirmation) {
+      if ((result as any).needsConfirmation) {
         Alert.alert(
           'Check Your Email', 
           'Account created! Please check your email and click the confirmation link to activate your account.',
@@ -57,10 +57,9 @@ export default function SignupScreen() {
           ]
         );
       } else {
-        // Don't show alert, let the index.tsx handle navigation
-        console.log('Signup successful, user should be redirected automatically');
-        // Navigate back to index to let the auth state change handle the redirect
-        router.replace('/');
+        // Navigate directly to tabs to avoid intermediate redirects on Android
+        console.log('Signup successful, navigating to home tabs');
+          router.replace('/(tabs)');
       }
     } else {
       console.error('Signup error:', result.error);

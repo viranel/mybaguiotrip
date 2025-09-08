@@ -93,6 +93,11 @@ export default function PlannerScreen() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const formatDate = (date: Date): string => {
+    // Use ISO format for better compatibility
+    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+  };
+
+  const formatDateForDisplay = (date: Date): string => {
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: '2-digit',
@@ -260,7 +265,7 @@ export default function PlannerScreen() {
                   onPress={() => setShowStartDatePicker(true)}
                 >
                   <CustomText variant="body" style={styles.dateText}>
-                    {formatDate(startDate)}
+                    {formatDateForDisplay(startDate)}
                   </CustomText>
                   <Ionicons name="calendar-outline" size={20} color={Colors.neutrals.gray600} />
                 </TouchableOpacity>
@@ -297,7 +302,7 @@ export default function PlannerScreen() {
                   onPress={() => setShowEndDatePicker(true)}
                 >
                   <CustomText variant="body" style={styles.dateText}>
-                    {formatDate(endDate)}
+                    {formatDateForDisplay(endDate)}
                   </CustomText>
                   <Ionicons name="calendar-outline" size={20} color={Colors.neutrals.gray600} />
           </TouchableOpacity>

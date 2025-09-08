@@ -20,6 +20,7 @@ export const Colors = {
   },
   neutrals: {
     white: '#FFFFFF',
+    background: '#F9FAFB',
     gray50: '#F9FAFB',
     gray100: '#F3F4F6',
     gray200: '#E5E7EB',
@@ -30,6 +31,8 @@ export const Colors = {
     gray700: '#374151',
     gray800: '#1F2937',
     gray900: '#111827',
+    charcoal: '#111827',
+    darkGray: '#4B5563',
     black: '#000000',
   },
   functional: {

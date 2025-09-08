@@ -6,6 +6,7 @@ import { StyleSheet, View, ViewStyle } from 'react-native';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { DesignTokens } from '@/constants/DesignTokens';
+import { Platform } from 'react-native';
 
 export default function TabLayout() {
   return (
@@ -15,7 +16,7 @@ export default function TabLayout() {
           tabBarActiveTintColor: Colors.appIdentity.primaryBrand,
           tabBarInactiveTintColor: Colors.neutrals.gray600,
           headerShown: false,
-          tabBarBackground: TabBarBackground,
+          tabBarBackground: Platform.OS === 'android' ? undefined : TabBarBackground,
           animation: 'shift',
           tabBarStyle: {
             position: 'absolute',
@@ -44,7 +45,7 @@ export default function TabLayout() {
           },
         }}>
         <Tabs.Screen
-          name="dashboard-simple"
+          name="index"
           options={{
             title: 'Home',
             tabBarIcon: ({ color, focused }) => (

@@ -1,4 +1,6 @@
 // Trip management service for saving and retrieving itineraries
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 export interface GeneratedItinerary {
   id: string;
@@ -29,13 +31,17 @@ class TripsService {
   }
 
 
-  // Save itinerary to local storage for specific user
+  // Save itinerary to storage for specific user
   async saveItinerary(itinerary: GeneratedItinerary, userEmail: string): Promise<void> {
     try {
       const storageKey = this.getStorageKey(userEmail);
-      const existingTrips = this.getTrips(userEmail);
+      const existingTrips = await this.getTrips(userEmail);
       existingTrips.push(itinerary);
-      localStorage.setItem(storageKey, JSON.stringify(existingTrips));
+      if (Platform.OS === 'web') {
+        localStorage.setItem(storageKey, JSON.stringify(existingTrips));
+      } else {
+        await AsyncStorage.setItem(storageKey, JSON.stringify(existingTrips));
+      }
       console.log('✅ Itinerary saved successfully for user:', { userEmail, storageKey, itineraryId: itinerary.id, totalTrips: existingTrips.length });
     } catch (error) {
       console.error('❌ Error saving itinerary:', error);
@@ -44,23 +50,29 @@ class TripsService {
   }
 
   // Get all saved trips for specific user
-  getTrips(userEmail: string): GeneratedItinerary[] {
+  async getTrips(userEmail: string): Promise<GeneratedItinerary[]> {
     try {
       const storageKey = this.getStorageKey(userEmail);
-      const trips = localStorage.getItem(storageKey);
-      const tripsArray = trips ? JSON.parse(trips) : [];
+      let tripsArray: GeneratedItinerary[] = [];
+      if (Platform.OS === 'web') {
+        const trips = localStorage.getItem(storageKey);
+        tripsArray = trips ? JSON.parse(trips) : [];
+      } else {
+        const trips = await AsyncStorage.getItem(storageKey);
+        tripsArray = trips ? JSON.parse(trips) : [];
+      }
       console.log('📋 Loading trips for user:', { userEmail, storageKey, tripsCount: tripsArray.length });
       return tripsArray;
     } catch (error) {
       console.error('❌ Error retrieving trips:', error);
-      return [];
+      return [] as GeneratedItinerary[];
     }
   }
 
   // Get trip by ID for specific user
-  getTripById(id: string, userEmail: string): GeneratedItinerary | null {
+  async getTripById(id: string, userEmail: string): Promise<GeneratedItinerary | null> {
     try {
-      const trips = this.getTrips(userEmail);
+      const trips = await this.getTrips(userEmail);
       const trip = trips.find(trip => trip.id === id) || null;
       console.log('🔍 Looking for trip:', { id, userEmail, found: !!trip });
       return trip;
@@ -74,9 +86,13 @@ class TripsService {
   async deleteTrip(id: string, userEmail: string): Promise<void> {
     try {
       const storageKey = this.getStorageKey(userEmail);
-      const trips = this.getTrips(userEmail);
+      const trips = await this.getTrips(userEmail);
       const filteredTrips = trips.filter(trip => trip.id !== id);
-      localStorage.setItem(storageKey, JSON.stringify(filteredTrips));
+      if (Platform.OS === 'web') {
+        localStorage.setItem(storageKey, JSON.stringify(filteredTrips));
+      } else {
+        await AsyncStorage.setItem(storageKey, JSON.stringify(filteredTrips));
+      }
       console.log('🗑️ Trip deleted successfully for user:', { userEmail, id, remainingTrips: filteredTrips.length });
     } catch (error) {
       console.error('❌ Error deleting trip:', error);
@@ -85,8 +101,8 @@ class TripsService {
   }
 
   // Get trip statistics for specific user
-  getTripStats(userEmail: string) {
-    const trips = this.getTrips(userEmail);
+  async getTripStats(userEmail: string) {
+    const trips = await this.getTrips(userEmail);
     const totalTrips = trips.length;
     const totalDays = trips.reduce((sum, trip) => sum + trip.duration, 0);
     const totalBudget = trips.reduce((sum, trip) => sum + trip.totalBudget, 0);
@@ -101,8 +117,8 @@ class TripsService {
   }
 
   // Get recent trips (last 5) for specific user
-  getRecentTrips(userEmail: string): GeneratedItinerary[] {
-    const trips = this.getTrips(userEmail);
+  async getRecentTrips(userEmail: string): Promise<GeneratedItinerary[]> {
+    const trips = await this.getTrips(userEmail);
     return trips
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 5);

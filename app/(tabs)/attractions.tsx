@@ -141,7 +141,7 @@ export default function AttractionsScreen() {
             onPress={() => handleAttractionPress(attraction)}
             activeOpacity={0.7}
           >
-            <Image source={{ uri: attraction.image }} style={styles.attractionImage} />
+            <Image source={attraction.image} style={styles.attractionImage} />
             <View style={styles.attractionInfo}>
               <View style={styles.attractionHeader}>
                 <CustomText variant="h3" style={styles.attractionName}>

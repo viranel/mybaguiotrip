@@ -44,9 +44,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Listen for auth state changes
     const { data: { subscription } } = auth.onAuthStateChange((user) => {
-      console.log('AuthProvider: Auth state changed:', user?.email || 'No user');
-      setUser(user);
-      setLoading(false);
+      try {
+        console.log('AuthProvider: Auth state changed:', user?.email || 'No user');
+        setUser(user);
+        setLoading(false);
+      } catch (error) {
+        console.error('AuthProvider: Error in auth state change:', error);
+        setLoading(false);
+      }
     });
 
     return () => {

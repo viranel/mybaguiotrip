@@ -57,24 +57,42 @@ export default function TripsScreen() {
       }
 
       // Get AI-generated itineraries from local storage for this user
-      const aiTrips = tripsService.getTrips(user.email);
+      const aiTrips = await tripsService.getTrips(user.email);
       console.log('📋 Loading trips from storage for user:', user.email, aiTrips.length, 'trips found');
       console.log('📝 Trip titles:', aiTrips.map(trip => trip.title));
       
       // Convert AI trips to our interface format
-      const convertedAITrips: Itinerary[] = aiTrips.map(trip => ({
-        id: trip.id,
-        title: trip.title,
-        destination: trip.destination,
-        startDate: new Date(trip.startDate).toLocaleDateString(),
-        endDate: new Date(trip.endDate).toLocaleDateString(),
-        duration: `${trip.duration} days`,
-        travelers: trip.travelers,
-        budget: trip.totalBudget,
-        status: 'planned' as const,
-        activities: trip.days?.map(day => day.activities?.map((activity: any) => activity.name)).flat() || [],
-        image: 'https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=400&h=200&fit=crop',
-      }));
+      const convertedAITrips: Itinerary[] = aiTrips.map(trip => {
+        // Better date handling
+        const formatDate = (dateString: string) => {
+          try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+              // If date is invalid, try to parse it as ISO string or return original
+              console.warn('Invalid date string:', dateString);
+              return dateString; // Return original string if can't parse
+            }
+            return date.toLocaleDateString();
+          } catch (error) {
+            console.warn('Error formatting date:', dateString, error);
+            return dateString; // Return original string if error
+          }
+        };
+
+        return {
+          id: trip.id,
+          title: trip.title,
+          destination: trip.destination,
+          startDate: formatDate(trip.startDate),
+          endDate: formatDate(trip.endDate),
+          duration: `${trip.duration} days`,
+          travelers: trip.travelers,
+          budget: trip.totalBudget,
+          status: 'planned' as const,
+          activities: trip.days?.map(day => day.activities?.map((activity: any) => activity.name)).flat() || [],
+          image: 'https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=400&h=200&fit=crop',
+        };
+      });
       
       // Use only AI-generated trips
       setUserTrips(convertedAITrips);
@@ -92,9 +110,19 @@ export default function TripsScreen() {
   };
 
 
-  const handleViewItinerary = (itinerary: Itinerary) => {
-    // Navigate to full itinerary details
-    console.log('View itinerary:', itinerary.title);
+  const handleViewItinerary = async (itinerary: Itinerary) => {
+    try {
+      console.log('View itinerary:', itinerary.title);
+      // Navigate to full itinerary details
+      router.push({
+        pathname: '/itinerary-detail',
+        params: {
+          itineraryId: itinerary.id
+        }
+      });
+    } catch (error) {
+      console.error('Error navigating to itinerary:', error);
+    }
   };
 
   const getStatusColor = (status: Itinerary['status']) => {
@@ -115,7 +143,7 @@ export default function TripsScreen() {
     }
   };
 
-  const handleTripPress = (trip: Itinerary) => {
+  const handleTripPress = async (trip: Itinerary) => {
     if (!user?.id) {
       console.log('No user logged in');
       return;
@@ -127,7 +155,7 @@ export default function TripsScreen() {
     }
 
     // Check if this is an AI-generated trip for this user
-    const aiTrip = tripsService.getTripById(trip.id, user.email);
+    const aiTrip = await tripsService.getTripById(trip.id, user.email);
     if (aiTrip) {
       // Navigate to itinerary detail with only the ID
       router.push({
