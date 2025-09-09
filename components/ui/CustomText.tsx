@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TextProps, TextStyle } from 'react-native';
+import { Platform, StyleSheet, Text, TextProps, TextStyle } from 'react-native';
 import { Colors } from '../../constants/Colors';
 import { DesignTokens } from '../../constants/DesignTokens';
 import { Fonts } from '../../constants/Fonts';
@@ -32,6 +32,25 @@ export default function CustomText({
   };
 
   const getFontFamily = (): string => {
+    // Use web-safe fonts as fallbacks
+    if (Platform.OS === 'web') {
+      switch (variant) {
+        case 'h1': 
+        case 'h2': 
+          return 'Nexa-Heavy, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        case 'h3': 
+        case 'buttonText': 
+        case 'overlayText': 
+          return 'Nexa-Heavy, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        case 'bodySmall': 
+        case 'caption': 
+          return 'Nexa-ExtraLight, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        default: 
+          return 'SpaceMono, "Courier New", monospace';
+      }
+    }
+    
+    // Mobile uses custom fonts
     switch (variant) {
       case 'h1': 
       case 'h2': 

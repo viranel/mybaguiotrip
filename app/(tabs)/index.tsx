@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { Animated, SafeAreaView, StyleSheet, TextInput, TextStyle, View, ViewStyle } from 'react-native';
+import { Animated, Platform, SafeAreaView, StyleSheet, TextInput, TextStyle, View, ViewStyle } from 'react-native';
 import FeaturedDestinations from '../../components/dashboard/FeaturedDestinations';
 import QuickActions from '../../components/dashboard/QuickActions';
 import CustomText from '../../components/ui/CustomText';
@@ -80,6 +80,7 @@ export default function DashboardScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" backgroundColor={Colors.appIdentity.primaryBrand} />
+      {Platform.OS === 'web' && <View style={styles.webSpacer} />}
       
       {/* Header with Gradient */}
       <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
@@ -192,6 +193,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.neutrals.white,
+  } as ViewStyle,
+  webSpacer: {
+    height: 70, // Match the web tab bar height
   } as ViewStyle,
   header: {
     paddingTop: DesignTokens.spacing.xl,

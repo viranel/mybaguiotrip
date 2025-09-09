@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, ViewStyle } from 'react-native';
+import { Animated, Platform, StyleSheet, ViewStyle } from 'react-native';
 
 interface AnimatedScreenProps {
   children: React.ReactNode;
@@ -15,20 +15,47 @@ export default function AnimatedScreen({
   duration = 300 
 }: AnimatedScreenProps) {
   const animatedValue = useRef(new Animated.Value(0)).current;
+  const isWeb = Platform.OS === 'web';
 
   useEffect(() => {
     const startAnimation = () => {
       Animated.timing(animatedValue, {
         toValue: 1,
-        duration,
+        duration: isWeb ? 150 : duration, // Faster animations on web
         useNativeDriver: true,
       }).start();
     };
 
     startAnimation();
-  }, [animatedValue, duration]);
+  }, [animatedValue, duration, isWeb]);
 
   const getAnimationStyle = () => {
+    // On web, use simpler animations for better performance
+    if (isWeb) {
+      switch (animationType) {
+        case 'slideInRight':
+        case 'slideInLeft':
+        case 'scaleIn':
+          return {
+            opacity: animatedValue,
+            transform: [
+              {
+                translateY: animatedValue.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [20, 0],
+                }),
+              },
+            ],
+          };
+        case 'fadeIn':
+        default:
+          return {
+            opacity: animatedValue,
+          };
+      }
+    }
+
+    // Mobile animations remain the same
     switch (animationType) {
       case 'slideInRight':
         return {

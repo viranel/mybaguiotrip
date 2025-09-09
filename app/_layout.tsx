@@ -1,10 +1,8 @@
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import 'react-native-gesture-handler';
-import 'react-native-reanimated';
+import { Platform } from 'react-native';
 
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from '../providers/AuthProvider';
 
 export default function RootLayout() {
@@ -14,45 +12,48 @@ export default function RootLayout() {
     'Nexa-Heavy': require('../assets/fonts/Nexa-Heavy.ttf'),
   });
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
+  // For web, use fallback fonts and don't wait for custom fonts
+  if (Platform.OS === 'web') {
+    // Web doesn't need to wait for fonts
+  } else if (!loaded) {
     return null;
   }
 
   return (
     <AuthProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <Stack
+      <Stack
         screenOptions={{
-          animation: 'slide_from_right',
-          gestureEnabled: true,
+          animation: Platform.OS === 'web' ? 'none' : 'slide_from_right',
+          gestureEnabled: Platform.OS !== 'web',
           gestureDirection: 'horizontal',
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="simple-test" options={{ headerShown: false }} />
+        <Stack.Screen name="web-debug" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="auth" options={{ headerShown: false }} />
+        <Stack.Screen name="auth/web-login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen 
           name="itinerary-detail" 
           options={{ 
             headerShown: false,
-            animation: 'slide_from_right',
-            gestureEnabled: true,
+            animation: Platform.OS === 'web' ? 'none' : 'slide_from_right',
+            gestureEnabled: Platform.OS !== 'web',
           }} 
         />
         <Stack.Screen 
           name="generating-itinerary" 
           options={{ 
             headerShown: false,
-            animation: 'slide_from_right',
-            gestureEnabled: true,
+            animation: Platform.OS === 'web' ? 'none' : 'slide_from_right',
+            gestureEnabled: Platform.OS !== 'web',
           }} 
         />
         <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </GestureHandlerRootView>
+      </Stack>
+      <StatusBar style="auto" />
     </AuthProvider>
   );
 }
